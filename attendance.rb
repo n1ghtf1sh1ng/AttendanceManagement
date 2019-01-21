@@ -1,4 +1,13 @@
 require 'sinatra'
+require 'digest/md5'
+require 'active_record'
+require 'date'
+
+ActiveRecord::Base.configurations = YAML.load_file('database.yml')
+ActiveRecord::Base.establish_connection :development
+
+class Pass < ActiveRecord::Base
+end
 
 set :environment, :production
 set :sessions,
@@ -14,12 +23,33 @@ get '/login' do
 end
 
 post '/auth' do
-    username = params[:uname]
-    pass = params[:pass]
+    trial_id = params[:id]
+    trial_pass = params[:pass]
+    begin
+        a = Pass.find(trial_id)
+        db_id = a.id
+        db_name = a.name
+        db_salt = a.salt
+        db_hashed = a.hashed
+    rescue => e
+        puts "User #{trial_id} is not found."
+        session[:login_flag] = false
+        redirect '/failure'
+    end
+    trial_hashed = Digest::MD5.hexdigest(db_salt + trial_pass)
+    for i in 0..100
+        trial_hashed = Digest::MD5.hexdigest(db_salt + trial_hashed)
+    end
 
-    if((username == "shimizu") && (pass == "kaketo"))
+    if db_hashed == trial_hashed
         session[:login_flag] = true
-        session[:testdata] = "This is page to manage attendance."
+        if a.time == nil
+            session[:testdata] = "This is page to manage attendance.\nFirst login."
+        else
+            session[:testdata] = "This is page to manage attendance.\nLast login:#{a.time}"
+        end
+        a.time = DateTime.now.strftime("%Y-%m-%d-%H%M")
+        a.save
         redirect '/contentspage'
     else
         session[:login_flag] = false
