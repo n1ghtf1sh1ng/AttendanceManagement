@@ -28,9 +28,8 @@ get '/:year/:month' do
     end
 end
 
-next month
+# next month
 get '/:year/:month/next' do
-    puts params['year']
     y = params['year']
     m = params['month']
     year = y.to_i

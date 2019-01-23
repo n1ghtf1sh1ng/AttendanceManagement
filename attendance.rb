@@ -43,6 +43,7 @@ post '/auth' do
 
     if db_hashed == trial_hashed
         session[:login_flag] = true
+        session[:date_flag] = true
         if a.time == nil
             session[:testdata] = "This is page to manage attendance.\nFirst login."
         else
@@ -52,7 +53,6 @@ post '/auth' do
         a.save
         redirect '/contentspage'
     else
-        session[:login_flag] = false
         redirect '/failure'
     end
 end
@@ -63,13 +63,65 @@ end
 
 get '/contentspage' do
     if (session[:login_flag] == true)
-        # @a = session[:testdata]
-        # erb :contents
-        @d = Date.today
-        @d = Date.new(@d.year, @d.month)
-        @p = @d - 1
-        @e = Date.new(@d.year, @d.month, -1)
-        erb :calendar
+        year = Date.today.year
+        month = Date.today.month
+        redirect '/contentspage/' + year.to_s + '/' + month.to_s
+    else
+        erb :badrequest
+    end
+end
+
+get '/contentspage/:year/:month' do
+    if (session[:login_flag] == true)
+        y = params['year']
+        m = params['month']
+        year = y.to_i
+        month = m.to_i
+        if year <= 2100 && year >= 1900 && month <= 12 && month >= 1 then  
+            @d = Date.new(year, month)
+            @p = @d - 1
+            @e = Date.new(year, month, -1)
+            erb :calendar
+        else 
+            @d = Date.new(Date.today.year, Date.today.month)
+            @p = @d - 1
+            @e = Date.new(@d.year, @d.month, -1)
+            erb :calendar
+        end
+    else
+        erb :badrequest
+    end
+end
+
+get '/contentspage/:year/:month/next' do
+    if (session[:login_flag] == true)
+        y = params['year']
+        m = params['month']
+        year = y.to_i
+        if 1 <= m.to_i && m.to_i <= 11 then
+            month = m.to_i + 1
+        elsif m.to_i == 12 then
+            month = 1
+            year += 1
+        end
+        redirect '/contentspage/' + year.to_s + '/' + month.to_s
+    else
+        erb :badrequest
+    end
+end
+
+get '/contentspage/:year/:month/last' do
+    if (session[:login_flag] == true)
+        y = params['year']
+        m = params['month']
+        year = y.to_i
+        if 2 <= m.to_i && m.to_i <= 12 then
+            month = m.to_i - 1
+        elsif m.to_i == 1 then
+            month = 12
+            year -= 1
+        end
+        redirect '/contentspage/' + year.to_s + '/' + month.to_s
     else
         erb :badrequest
     end
