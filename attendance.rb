@@ -63,8 +63,13 @@ end
 
 get '/contentspage' do
     if (session[:login_flag] == true)
-        @a = session[:testdata]
-        erb :contents
+        # @a = session[:testdata]
+        # erb :contents
+        @d = Date.today
+        @d = Date.new(@d.year, @d.month)
+        @p = @d - 1
+        @e = Date.new(@d.year, @d.month, -1)
+        erb :calendar
     else
         erb :badrequest
     end

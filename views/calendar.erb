@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>calendar</title>
+<style type="text/css">
+th{
+    text-align: center;
+}
+td{
+    font-size: x-large;
+width: 160px;
+height: 120px;
+        vertical-align: top;
+        text-align: left;
+}
+</style>
+</head>
+
+<body>
+<center>
+<table border>
+<tr>
+<th> Sun</th>
+<th> Mon</th>
+<th> Tue</th>
+<th> Wed</th>
+<th> Thu</th>
+<th> Fri</th>
+<th> Sat</th>
+</tr>
+
+<div border><%= @d.year %> / <%= @d.month %></div>
+<tr>
+
+<% if @p.wday != 6 then %>
+<% for i in 0..(@p.wday) do %>
+<td>&nbsp;</td>
+<% end %>
+<% end %>
+<% until @d == @e do %>
+<% if @d.wday == 0 then %>
+<td style="color:red"><%= @d.day %></td>
+<% elsif @d.wday == 6 then %>
+<td style="color:blue"><%= @d.day %></td>
+<% else %>
+<td style="color:black"><%= @d.day %></td>
+<% end %>
+<% @d += 1 %>
+<% if @d.wday == 0 then %>
+</tr>
+<tr>
+<% end %>
+<% end %>
+<% if @d.wday == 0 then %>
+<td style="color:red"><%= @e.day %></td>
+<% elsif @d.wday == 6 then %>
+<td style="color:blue"><%= @e.day %></td>
+<% else %>
+<td style="color:black"><%= @e.day %></td>
+<% end %>
+</tr>
+</center>
+
+<!-- <a href="/<%= @d.year %>/<%= @d.month %>/last">Last month.</a> &nbsp;
+<a href="/<%= @d.year %>/<%= @d.month %>/next">Next month.</a><br> -->
+<button type="button" onclick="location.href='contentspage'">
+&lt;
+</button>
+&nbsp;
+<button type="button" onclick="location.href='contentspage'">
+<% if 1 <= @d.month && @d.month >= 11 then %>
+<% @d.month += 1 %>
+<% elsif @d.month == 12 then %>
+<% @d.year += 1 %>
+<% @d.month = 1 %>
+<% end %>
+&gt;
+</button>
+
+</table>
+</body>
+</html>
