@@ -1,4 +1,38 @@
 This is main contents page.<br>
-Test data = <%= @a %><br>
+Test data = <%= @a %><br><br>
 
-<a href="/logout">logout</a>
+<table border>
+    <tr>
+    <th>Starttime of work</th>
+    <th>Endtime of work</th>
+    <th>Breaktime(m)</th>
+    <th>Attendance</th>
+    </tr>
+
+    <form method="post" action="/<%=params['year']%>/<%=params['month']%>/<%=params['day']%>/worktime">
+        <tr>
+        <%if @w.empty? == false%>
+            <td><input type="time" name="start" value=<%=@w.first.start_time%>></td>
+            <td><input type="time" name="end" value=<%=@w.first.end_time%>></td>
+            <td><input type="number" name="break" value=<%=@w.first.break_time%>></td>
+            <td><select id="absence" name="absence">
+                <option value="0">--</option>
+                <option value="1">Absence</option>
+                </select></td>
+            <td><input type="submit" value="Registration"></td>
+        <%elsif @w.empty? == true%>
+            <td><input type="time" name="start" value="00:00"></td>
+            <td><input type="time" name="end" value="00:00"></td>
+            <td><input type="number" name="break" value="60"></td>
+            <td><select id="absence" name="absence">
+                <option value="0">--</option>
+                <option value="1">Absence</option>
+                </select></td>
+            <td><input type="submit" value="Registration"></td>
+        <%end%>
+        </tr>
+    </form>
+</table>
+
+<a href="/<%=params['year']%>/<%=params['month']%>">Back to calendar.</a>
+<a href="/logout">Logout</a>

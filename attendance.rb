@@ -9,19 +9,29 @@ ActiveRecord::Base.establish_connection :development
 class Pass < ActiveRecord::Base
 end
 
+class Worktime < ActiveRecord::Base
+    # self.primary_keys = :id, :date
+end
+
+class Work < ActiveRecord::Base
+    # self.primary_keys = :id, :date
+end
+
 set :environment, :production
 set :sessions,
-    expire_after: 7200,
-    secret: 'abcdefghij0123456789'
+    expire_after: 300, # seconds 
+    secret: 'n1ghtf1sh1ng'
 
 get '/' do
     redirect '/login'
 end
 
+# ログインフォーム
 get '/login' do
     erb :loginscr
 end
 
+# ログイン認証
 post '/auth' do
     trial_id = params[:id]
     trial_pass = params[:pass]
@@ -32,7 +42,6 @@ post '/auth' do
         db_salt = a.salt
         db_hashed = a.hashed
     rescue => e
-        puts "User #{trial_id} is not found."
         session[:login_flag] = false
         redirect '/failure'
     end
@@ -43,7 +52,7 @@ post '/auth' do
 
     if db_hashed == trial_hashed
         session[:login_flag] = true
-        session[:date_flag] = true
+        session[:id] = params[:id]
         if a.time == nil
             session[:testdata] = "This is page to manage attendance.\nFirst login."
         else
@@ -51,27 +60,21 @@ post '/auth' do
         end
         a.time = DateTime.now.strftime("%Y-%m-%d-%H%M")
         a.save
-        redirect '/contentspage'
+        year = Date.today.year
+        month = Date.today.month
+        redirect '/' + year.to_s + '/' + month.to_s
     else
         redirect '/failure'
     end
 end
 
+# ログイン失敗
 get '/failure' do
     erb :failure
 end
 
-get '/contentspage' do
-    if (session[:login_flag] == true)
-        year = Date.today.year
-        month = Date.today.month
-        redirect '/contentspage/' + year.to_s + '/' + month.to_s
-    else
-        erb :badrequest
-    end
-end
-
-get '/contentspage/:year/:month' do
+# カレンダー表示
+get '/:year/:month' do
     if (session[:login_flag] == true)
         y = params['year']
         m = params['month']
@@ -93,7 +96,8 @@ get '/contentspage/:year/:month' do
     end
 end
 
-get '/contentspage/:year/:month/next' do
+# 来月のカレンダーに移動
+get '/:year/:month/next' do
     if (session[:login_flag] == true)
         y = params['year']
         m = params['month']
@@ -104,13 +108,14 @@ get '/contentspage/:year/:month/next' do
             month = 1
             year += 1
         end
-        redirect '/contentspage/' + year.to_s + '/' + month.to_s
+        redirect '/' + year.to_s + '/' + month.to_s
     else
         erb :badrequest
     end
 end
 
-get '/contentspage/:year/:month/last' do
+# 先月のカレンダーに移動
+get '/:year/:month/last' do
     if (session[:login_flag] == true)
         y = params['year']
         m = params['month']
@@ -121,13 +126,66 @@ get '/contentspage/:year/:month/last' do
             month = 12
             year -= 1
         end
-        redirect '/contentspage/' + year.to_s + '/' + month.to_s
+        redirect '/' + year.to_s + '/' + month.to_s
     else
         erb :badrequest
     end
 end
 
+# 勤務情報登録フォーム
+get '/:year/:month/:day' do
+    if (session[:login_flag] == true)
+        @a = "This is page to manage attendance."
+        session[:date] = params['year'] + '-' + params['month'] + '-' + params['day']
+        @w = Worktime.where(id: session[:id].to_s).where(date: session[:date].to_s)
+        erb :contents
+    else
+        erb :badrequest
+    end
+end
+
+# 勤務時間登録
+post '/:year/:month/:day/worktime' do
+    if (session[:login_flag] == true)
+        begin
+            worktime = Worktime.new
+            worktime.id = session[:id]
+            worktime.date = params['year'] + '-' + params['month'] + '-' + params['day']
+            if (params[:absence] == "1") then
+                worktime.start_time = "00:00"
+                worktime.end_time = "00:00"
+                worktime.break_time = 0
+            elsif (params[:absence] == "0") then
+                worktime.start_time = params[:start]
+                worktime.end_time = params[:end]
+                worktime.break_time = params[:break]
+            end
+            worktime.save
+            redirect '/' + params['year'] + '/' + params['month'] + '/' + params['day']
+        rescue => e
+            redirect '/' + params['year'] + '/' + params['month'] + '/' + params['day'] + '/error'
+        end
+    else
+        erb :badrequest
+    end
+end
+
+# 勤務内容登録
+post '/:year/:month/:day/work' do
+    if (session[:login_flag] == true)
+        redirect '/' + params['year'] + '/' + params['month'] + '/' + params['day']
+    else
+        erb :badrequest
+    end
+end
+
+# ログアウト処理
 get '/logout' do
     session.clear
     erb :logout
+end
+
+# データベースエラー
+get '/:year/:month/:day/error' do
+    erb :regerror
 end

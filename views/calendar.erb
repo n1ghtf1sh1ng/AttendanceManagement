@@ -4,16 +4,19 @@
     <meta charset="utf-8" />
     <title>calendar</title>
     <style type="text/css">
-    th{
-        text-align: center;
-    }
+    th{text-align: center;}
     td{
         font-size: x-large;
-    width: 160px;
-    height: 120px;
-            vertical-align: top;
-            text-align: left;
+        width: 160px;
+        height: 120px;
+        vertical-align: top;
+        text-align: left;
     }
+    a{text-decoration: none}
+    .saturday{color: blue;}
+    .sunday{color: red;}
+    .sunday{color: red;}
+    .weekday{color: black;}
     </style>
 </head>
 
@@ -30,9 +33,42 @@
     <th> Sat</th>
     </tr>
 
-    <div border><%= @d.year %> / <%= @d.month %></div>
-    <tr>
+    <%if @d.month == 1 then%>
+        <h2>January <%=@d.year%></h2>
+    <%elsif @d.month == 2 then%>
+        <h2>February <%=@d.year%></h2>
+    <%elsif @d.month == 3 then%>
+        <h2>March <%=@d.year%></h2>
+    <%elsif @d.month == 4 then%>
+        <h2>April <%=@d.year%></h2>
+    <%elsif @d.month == 5 then%>
+        <h2>May <%=@d.year%></h2>
+    <%elsif @d.month == 6 then%>
+        <h2>June <%=@d.year%></h2>
+    <%elsif @d.month == 7 then%>
+        <h2>July <%=@d.year%></h2>
+    <%elsif @d.month == 8 then%>
+        <h2>August <%=@d.year%></h2>
+    <%elsif @d.month == 9 then%>
+        <h2>September <%=@d.year%></h2>
+    <%elsif @d.month == 10 then%>
+        <h2>October <%=@d.year%></h2>
+    <%elsif @d.month == 11 then%>
+        <h2>November <%=@d.year%></h2>
+    <%elsif @d.month == 12 then%>
+        <h2>December <%=@d.year%></h2>
+    <%end%>
+    <button type="button" onclick="location.href='/<%= @d.year %>/<%= @d.month %>/last'">
+        &lt;
+    </button>
+    <%if (Date.today.year > @d.year) || (Date.today.year == @d.year && Date.today.month > @d.month) then%>
+        &nbsp;
+        <button type="button" onclick="location.href='/<%= @d.year %>/<%= @d.month %>/next'">
+            &gt;
+        </button>
+    <%end%>
 
+    <tr>
     <% if @p.wday != 6 then %>
         <% for i in 0..(@p.wday) do %>
             <td>&nbsp;</td>
@@ -40,11 +76,23 @@
     <% end %>
     <% until @d == @e do %>
         <% if @d.wday == 0 then %>
-            <td style="color:red"><%= @d.day %></td>
+            <td>
+                <a class="sunday" href="/<%= @d.year %>/<%= @d.month %>/<%= @d.day %>">
+                    <%= @d.day %>
+                </a>
+            </td>
         <% elsif @d.wday == 6 then %>
-            <td style="color:blue"><%= @d.day %></td>
+            <td>
+                <a class="saturday" href="/<%= @d.year %>/<%= @d.month %>/<%= @d.day %>">
+                    <%= @d.day %>
+                </a>
+            </td>
         <% else %>
-            <td style="color:black"><%= @d.day %></td>
+            <td>
+                <a class="weekday" href="/<%= @d.year %>/<%= @d.month %>/<%= @d.day %>">
+                    <%= @d.day %>
+                </a>
+            </td>
         <% end %>
         <% @d += 1 %>
         <% if @d.wday == 0 then %>
@@ -53,26 +101,26 @@
         <% end %>
     <% end %>
     <% if @d.wday == 0 then %>
-        <td style="color:red"><%= @e.day %></td>
+        <td>
+            <a class="sunday" href="/<%= @d.year %>/<%= @d.month %>/<%= @d.day %>">
+                <%= @d.day %>
+            </a>
+        </td>
     <% elsif @d.wday == 6 then %>
-        <td style="color:blue"><%= @e.day %></td>
+        <td>
+            <a class="saturday" href="/<%= @d.year %>/<%= @d.month %>/<%= @d.day %>">
+                <%= @d.day %>
+            </a>
+        </td>
     <% else %>
-        <td style="color:black"><%= @e.day %></td>
+        <td>
+            <a class="weekday" href="/<%= @d.year %>/<%= @d.month %>/<%= @d.day %>">
+                <%= @d.day %>
+            </a>
+        </td>
     <% end %>
     </tr>
     </center>
-
-    <!-- <a href="/<%= @d.year %>/<%= @d.month %>/last">Last month.</a> &nbsp;
-    <a href="/<%= @d.year %>/<%= @d.month %>/next">Next month.</a><br> -->
-
-    <button type="button" onclick="location.href='/contentspage/<%= @d.year %>/<%= @d.month %>/last'">
-        &lt;
-    </button>
-    &nbsp;
-    <button type="button" onclick="location.href='/contentspage/<%= @d.year %>/<%= @d.month %>/next'">
-        &gt;
-    </button>
-
     </table>
 </body>
 </html>
