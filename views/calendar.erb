@@ -13,6 +13,7 @@
         text-align: left;
     }
     a{text-decoration: none}
+    a:hover{text-decoration:underline}
     .saturday{color: blue;}
     .sunday{color: red;}
     .sunday{color: red;}
@@ -34,35 +35,35 @@
     <th> Sat</th>
     </tr>
 
-    <%if @d.month == 1 then%>
+    <%if @d.month == 1%>
         <h2>January <%=@d.year%></h2>
-    <%elsif @d.month == 2 then%>
+    <%elsif @d.month == 2%>
         <h2>February <%=@d.year%></h2>
-    <%elsif @d.month == 3 then%>
+    <%elsif @d.month == 3%>
         <h2>March <%=@d.year%></h2>
-    <%elsif @d.month == 4 then%>
+    <%elsif @d.month == 4%>
         <h2>April <%=@d.year%></h2>
-    <%elsif @d.month == 5 then%>
+    <%elsif @d.month == 5%>
         <h2>May <%=@d.year%></h2>
-    <%elsif @d.month == 6 then%>
+    <%elsif @d.month == 6%>
         <h2>June <%=@d.year%></h2>
-    <%elsif @d.month == 7 then%>
+    <%elsif @d.month == 7%>
         <h2>July <%=@d.year%></h2>
-    <%elsif @d.month == 8 then%>
+    <%elsif @d.month == 8%>
         <h2>August <%=@d.year%></h2>
-    <%elsif @d.month == 9 then%>
+    <%elsif @d.month == 9%>
         <h2>September <%=@d.year%></h2>
-    <%elsif @d.month == 10 then%>
+    <%elsif @d.month == 10%>
         <h2>October <%=@d.year%></h2>
-    <%elsif @d.month == 11 then%>
+    <%elsif @d.month == 11%>
         <h2>November <%=@d.year%></h2>
-    <%elsif @d.month == 12 then%>
+    <%elsif @d.month == 12%>
         <h2>December <%=@d.year%></h2>
     <%end%>
     <button class="button" type="button" onclick="location.href='/<%=@d.year%>/<%=@d.month%>/last'">
         &lt;
     </button>
-    <%if (Date.today.year > @d.year) || (Date.today.year == @d.year && Date.today.month > @d.month) then%>
+    <%if (Date.today.year > @d.year) || (Date.today.year == @d.year && Date.today.month > @d.month)%>
         &nbsp;
         <button class="button" type="button" onclick="location.href='/<%=@d.year%>/<%=@d.month%>/next'">
             &gt;
@@ -70,25 +71,25 @@
     <%end%>
 
     <tr>
-    <%if @p.wday != 6 then%>
+    <%if @p.wday != 6%>
         <%for i in 0..(@p.wday) do%>
             <td>&nbsp;</td>
         <%end%>
     <%end%>
     <%until @d == @e do%>
-        <%if Worktime.where(id: session[:id]).where(date: @d.year.to_s+'-'+@d.month.to_s+'-'+@d.day.to_s).first.nil? == false then%>
+        <%if (Worktime.where(id: session[:id]).where(date: @d.year.to_s+'-'+@d.month.to_s+'-'+@d.day.to_s).first) && (Work.where(id: session[:id]).where(date: @d.year.to_s+'-'+@d.month.to_s+'-'+@d.day.to_s).first)%>
             <td>
                 <a class="workday" href="/<%=@d.year%>/<%=@d.month%>/<%=@d.day%>">
                     <%=@d.day%>
                 </a>
             </td>
-        <%elsif @d.wday == 0 then%>
+        <%elsif @d.wday == 0%>
             <td>
                 <a class="sunday" href="/<%=@d.year%>/<%=@d.month%>/<%=@d.day%>">
                     <%=@d.day%>
                 </a>
             </td>
-        <%elsif @d.wday == 6 then%>
+        <%elsif @d.wday == 6%>
             <td>
                 <a class="saturday" href="/<%=@d.year%>/<%=@d.month%>/<%=@d.day%>">
                     <%=@d.day%>
@@ -102,24 +103,24 @@
             </td>
         <%end%>
         <%@d += 1%>
-        <%if @d.wday == 0 then%>
+        <%if @d.wday == 0%>
             </tr>
             <tr>
         <%end%>
     <%end%>
-    <%if Worktime.where(id: session[:id]).where(date: @d.year.to_s+'-'+@d.month.to_s+'-'+@d.day.to_s).first.nil? == false then%>
+    <%if Worktime.where(id: session[:id]).where(date: @d.year.to_s+'-'+@d.month.to_s+'-'+@d.day.to_s).first%>
         <td>
             <a class="workday" href="/<%=@d.year%>/<%=@d.month%>/<%=@d.day%>">
                 <%=@d.day%>
             </a>
         </td>
-    <%elsif @d.wday == 0 then%>
+    <%elsif @d.wday == 0%>
         <td>
             <a class="sunday" href="/<%=@d.year%>/<%=@d.month%>/<%=@d.day%>">
                 <%=@d.day%>
             </a>
         </td>
-    <%elsif @d.wday == 6 then%>
+    <%elsif @d.wday == 6%>
         <td>
             <a class="saturday" href="/<%=@d.year%>/<%=@d.month%>/<%=@d.day%>">
                 <%=@d.day%>

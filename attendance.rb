@@ -10,11 +10,9 @@ class Pass < ActiveRecord::Base
 end
 
 class Worktime < ActiveRecord::Base
-    # self.primary_keys = :id, :date
 end
 
 class Work < ActiveRecord::Base
-    # self.primary_keys = :id, :date
 end
 
 set :environment, :production
@@ -37,14 +35,12 @@ post '/auth' do
     trial_pass = params[:pass]
     begin
         a = Pass.find(trial_id)
-        db_id = a.id
-        db_name = a.name
-        db_salt = a.salt
-        db_hashed = a.hashed
     rescue => e
         session[:login_flag] = false
         redirect '/failure'
     end
+    db_hashed = a.hashed
+    db_salt = a.salt
     trial_hashed = Digest::MD5.hexdigest(db_salt + trial_pass)
     for i in 0..100
         trial_hashed = Digest::MD5.hexdigest(db_salt + trial_hashed)
@@ -53,12 +49,7 @@ post '/auth' do
     if db_hashed == trial_hashed
         session[:login_flag] = true
         session[:id] = params[:id]
-        if a.time == nil
-            session[:testdata] = "This is page to manage attendance.\nFirst login."
-        else
-            session[:testdata] = "This is page to manage attendance.\nLast login:#{a.time}"
-        end
-        a.time = DateTime.now.strftime("%Y-%m-%d-%H%M")
+        session[:name] = a.name
         a.save
         year = Date.today.year
         month = Date.today.month
@@ -135,9 +126,15 @@ end
 # 勤務情報登録フォーム
 get '/:year/:month/:day' do
     if (session[:login_flag] == true)
-        @a = "This is page to manage attendance."
         session[:date] = params['year'] + '-' + params['month'] + '-' + params['day']
-        @w = Worktime.where(id: session[:id]).where(date: session[:date])
+        @wt = Worktime.where(id: session[:id]).where(date: session[:date]).first
+        if @wt
+            @actual_time = @wt.end_time[0,2].to_i*60 + @wt.end_time[3,2].to_i - @wt.start_time[0,2].to_i*60 - @wt.start_time[3,2].to_i
+        else
+            @actual_time = 0
+        end
+        @w = Work.where(id: session[:id]).where(date: session[:date])
+        session[:w_id] = @w.count + 1
         erb :contents
     else
         erb :badrequest
@@ -170,9 +167,32 @@ post '/:year/:month/:day/worktime' do
     end
 end
 
-# 勤務内容登録
+# 作業入力
 post '/:year/:month/:day/work' do
     if (session[:login_flag] == true)
+        begin
+            work = Work.new
+            work.w_id = session[:w_id]
+            work.id = session[:id]
+            work.date = params['year'] + '-' + params['month'] + '-' + params['day']
+            work.project = params[:project]
+            work.category = params[:category]
+            work.time = params[:time]
+            work.save
+            redirect '/' + params['year'] + '/' + params['month'] + '/' + params['day']
+        rescue => e
+            redirect '/' + params['year'] + '/' + params['month'] + '/' + params['day'] + '/error'
+        end
+    else
+        erb :badrequest
+    end
+end
+
+# 作業削除
+delete '/:year/:month/:day/w_del' do
+    if (session[:login_flag] == true)
+        w = Work.where(id: session[:id]).where(date: session[:date]).where(w_id: params[:w_id]).first
+        w.destroy
         redirect '/' + params['year'] + '/' + params['month'] + '/' + params['day']
     else
         erb :badrequest

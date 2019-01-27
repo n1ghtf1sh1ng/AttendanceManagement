@@ -10,9 +10,10 @@ end
 
 # Base information
 
-userid = "shimizu"
-username = "ShimizuKaketo"
-rawpasswd = "kaketo"
+userid = "administrator"
+username = "社長"
+rawpasswd = "president"
+auth = 1
 r = Random.new
 salt = Digest::MD5.hexdigest(r.bytes(20))
 hashed = Digest::MD5.hexdigest(salt + rawpasswd)
@@ -33,7 +34,7 @@ s.id = userid
 s.salt = salt
 s.hashed = hashed
 s.name = username
-s.time = nil
+s.auth = auth
 s.save
 
 # Display all entries in database

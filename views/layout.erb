@@ -20,11 +20,15 @@
             background-color: #59b1eb;
         }
         h1{text-align:center;}
+        p{text-align:right;}
     </style>
 </head>
 
 <body>
     <h1>Attendance Management</h1>
+    <%if session[:name]%>
+        <p>[<%=session[:name]%>]でログイン中</p>
+    <%end%>
     <%=yield%>
 </body>
 </html>

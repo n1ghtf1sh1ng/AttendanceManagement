@@ -1,44 +1,106 @@
-This is main contents page.<br>
-Test data = <%= @a %><br><br>
-
-<div>
-<table border>
-    <tr>
-    <th>就業開始時間</th>
-    <th>就業終了時間</th>
-    <th>休憩（分）</th>
-    <th>区分</th>
-    </tr>
-
-    <form method="post" action="/<%=params['year']%>/<%=params['month']%>/<%=params['day']%>/worktime">
+<style>
+    select{background-color:white;}
+    .box{
+        position: relative;
+        padding: 1.2em;
+        margin:20px;
+        color: #555555; /* 文章色 */
+        background-color: #fff; /* 背景色 */
+        border: 1px solid #555555; /* 枠線の太さ・色 */
+        width: 90%;
+    }
+    .title-box{
+        position:absolute;
+        left: 20px;
+        top:-15px;
+        font-weight:bold;
+        background-color: #fff; /* タイトル背景色 */
+        color: #555555; /* タイトル文字色 */
+    }
+</style>
+<section class="box">
+    <span class="title-box">勤務時間登録</span>
+    <table border>
         <tr>
-        <%if @w.empty? == false%>
-            <td><input type="time" name="start" value=<%=@w.first.start_time%>></td>
-            <td><input type="time" name="end" value=<%=@w.first.end_time%>></td>
-            <td><input type="number" name="break" value=<%=@w.first.break_time%>></td>
-            <td><select id="absence" name="absence">
-                <option value="0">--</option>
-                <option value="1">欠勤</option>
-                </select></td>
-            <td><input type="submit" value="登録"></td>
-        <%elsif @w.empty? == true%>
-            <td><input type="time" name="start" value="00:00"></td>
-            <td><input type="time" name="end" value="00:00"></td>
-            <td><input type="number" name="break" value="60"></td>
-            <td><select id="absence" name="absence">
-                <option value="0">--</option>
-                <option value="1">欠勤</option>
-                </select></td>
-            <td><input class="button" type="submit" value="登録"></td>
-        <%end%>
+        <th>就業開始時間</th>
+        <th>就業終了時間</th>
+        <th>休憩（分）</th>
+        <th>区分</th>
+        <th>実働時間（分）</th>
         </tr>
-    </form>
-</table>
 
-<%if @w.empty? == false%>
-    <large>勤務時間登録完了しました<br></large>
-<%end%>
-</div>
+        <form method="post" action="/<%=params['year']%>/<%=params['month']%>/<%=params['day']%>/worktime">
+            <tr>
+            <%if @wt%>
+                <td><input type="time" name="start" value=<%=@wt.start_time%>></td>
+                <td><input type="time" name="end" value=<%=@wt.end_time%>></td>
+                <td><input type="number" name="break" value=<%=@wt.break_time%>></td>
+                <td><select id="absence" name="absence">
+                    <option value="0">--</option>
+                    <option value="1">欠勤</option>
+                    </select></td>
+                <td><%=@actual_time%></td>
+                <td><input type="submit" value="登録"></td>
+            <%elsif @wt.nil?%>
+                <td><input type="time" name="start" value="00:00"></td>
+                <td><input type="time" name="end" value="00:00"></td>
+                <td><input type="number" name="break" value="60"></td>
+                <td><select id="absence" name="absence">
+                    <option value="0">--</option>
+                    <option value="1">欠勤</option>
+                    </select></td>
+                <td>--</td>
+                <td><input class="button" type="submit" value="登録"></td>
+            <%end%>
+            </tr>
+        </form>
+    </table>
+
+    <%if @wt%>
+        <large>勤務時間登録済です。<br></large>
+    <%end%>
+</section>
+
+<section class="box">
+    <span class="title-box">作業入力欄</span>
+    <table border>
+        <tr>
+        <th>No.</th>
+        <th>プロジェクト</th>
+        <th>作業区分</th>
+        <th>作業時間（分）</th>
+        </tr>
+        <%@w.each do |a|%>
+            <tr>
+            <td><%=a.w_id%></td>
+            <td><%=a.project%></td>
+            <td><%=a.category%></td>
+            <td><%=a.time%></td>
+            <form method="post" action="/<%=params['year']%>/<%=params['month']%>/<%=params['day']%>/w_del">
+            <td><input type="submit" value="削除"></td>
+            <input type="hidden" name="w_id" value="<%=a.w_id%>">
+            <input type="hidden" name="_method" value="delete">
+            </form>
+            </tr>
+        <%end%>
+
+        <form method="post" action="/<%=params['year']%>/<%=params['month']%>/<%=params['day']%>/work">
+            <tr>
+            <td><%=session[:w_id]%></td>
+            <td><input type="text" name="project"></td>
+            <td><select id="category" name="category">
+                <option value="開発">開発</option>
+                <option value="営業">営業</option>
+                <option value="会議">会議</option>
+                <option value="移動">移動</option>
+                <option value="自主学習">自主学習</option>
+                </select></td>
+            <td><input type="number" name="time" value="0"></td>
+            <td><input class="button" type="submit" value="登録"></td>
+            </tr>
+        </form>
+    </table>
+</section>
 
 <button class="button" type="button" onclick="location.href='/<%=params['year']%>/<%=params['month']%>'">カレンダーに戻る</button>
 <button class="button" type="button" onclick="location.href='/logout'">ログアウト</button>
