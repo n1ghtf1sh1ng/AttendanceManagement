@@ -11,14 +11,20 @@
         }
         input{font-size:100%;}
         select{font-size:100%;}
+        .button{
+            font-size:100%;
+            background-color: #333;
+            color: #fff;
+        }
+        .button:hover {
+            background-color: #59b1eb;
+        }
+        h1{text-align:center;}
     </style>
 </head>
 
 <body>
-    <center>
-    <h1>Attendance Management</h2>
-    </center>
-    <br>
-    <%= yield %>
+    <h1>Attendance Management</h1>
+    <%=yield%>
 </body>
 </html>

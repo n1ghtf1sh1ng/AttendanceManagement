@@ -1,12 +1,13 @@
 This is main contents page.<br>
 Test data = <%= @a %><br><br>
 
+<div>
 <table border>
     <tr>
-    <th>Starttime of work</th>
-    <th>Endtime of work</th>
-    <th>Breaktime(m)</th>
-    <th>Attendance</th>
+    <th>就業開始時間</th>
+    <th>就業終了時間</th>
+    <th>休憩（分）</th>
+    <th>区分</th>
     </tr>
 
     <form method="post" action="/<%=params['year']%>/<%=params['month']%>/<%=params['day']%>/worktime">
@@ -17,22 +18,27 @@ Test data = <%= @a %><br><br>
             <td><input type="number" name="break" value=<%=@w.first.break_time%>></td>
             <td><select id="absence" name="absence">
                 <option value="0">--</option>
-                <option value="1">Absence</option>
+                <option value="1">欠勤</option>
                 </select></td>
-            <td><input type="submit" value="Registration"></td>
+            <td><input type="submit" value="登録"></td>
         <%elsif @w.empty? == true%>
             <td><input type="time" name="start" value="00:00"></td>
             <td><input type="time" name="end" value="00:00"></td>
             <td><input type="number" name="break" value="60"></td>
             <td><select id="absence" name="absence">
                 <option value="0">--</option>
-                <option value="1">Absence</option>
+                <option value="1">欠勤</option>
                 </select></td>
-            <td><input type="submit" value="Registration"></td>
+            <td><input class="button" type="submit" value="登録"></td>
         <%end%>
         </tr>
     </form>
 </table>
 
-<a href="/<%=params['year']%>/<%=params['month']%>">Back to calendar.</a>
-<a href="/logout">Logout</a>
+<%if @w.empty? == false%>
+    <large>勤務時間登録完了しました<br></large>
+<%end%>
+</div>
+
+<button class="button" type="button" onclick="location.href='/<%=params['year']%>/<%=params['month']%>'">カレンダーに戻る</button>
+<button class="button" type="button" onclick="location.href='/logout'">ログアウト</button>

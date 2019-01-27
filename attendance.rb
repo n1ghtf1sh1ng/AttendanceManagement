@@ -80,7 +80,7 @@ get '/:year/:month' do
         m = params['month']
         year = y.to_i
         month = m.to_i
-        if year <= 2100 && year >= 1900 && month <= 12 && month >= 1 then  
+        if year <= 2100 && year >= 1900 && month <= 12 && month >= 1
             @d = Date.new(year, month)
             @p = @d - 1
             @e = Date.new(year, month, -1)
@@ -102,9 +102,9 @@ get '/:year/:month/next' do
         y = params['year']
         m = params['month']
         year = y.to_i
-        if 1 <= m.to_i && m.to_i <= 11 then
+        if 1 <= m.to_i && m.to_i <= 11
             month = m.to_i + 1
-        elsif m.to_i == 12 then
+        elsif m.to_i == 12
             month = 1
             year += 1
         end
@@ -120,9 +120,9 @@ get '/:year/:month/last' do
         y = params['year']
         m = params['month']
         year = y.to_i
-        if 2 <= m.to_i && m.to_i <= 12 then
+        if 2 <= m.to_i && m.to_i <= 12
             month = m.to_i - 1
-        elsif m.to_i == 1 then
+        elsif m.to_i == 1
             month = 12
             year -= 1
         end
@@ -137,7 +137,7 @@ get '/:year/:month/:day' do
     if (session[:login_flag] == true)
         @a = "This is page to manage attendance."
         session[:date] = params['year'] + '-' + params['month'] + '-' + params['day']
-        @w = Worktime.where(id: session[:id].to_s).where(date: session[:date].to_s)
+        @w = Worktime.where(id: session[:id]).where(date: session[:date])
         erb :contents
     else
         erb :badrequest
@@ -151,11 +151,11 @@ post '/:year/:month/:day/worktime' do
             worktime = Worktime.new
             worktime.id = session[:id]
             worktime.date = params['year'] + '-' + params['month'] + '-' + params['day']
-            if (params[:absence] == "1") then
+            if (params[:absence] == "1")
                 worktime.start_time = "00:00"
                 worktime.end_time = "00:00"
                 worktime.break_time = 0
-            elsif (params[:absence] == "0") then
+            elsif (params[:absence] == "0")
                 worktime.start_time = params[:start]
                 worktime.end_time = params[:end]
                 worktime.break_time = params[:break]

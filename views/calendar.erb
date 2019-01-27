@@ -17,6 +17,7 @@
     .sunday{color: red;}
     .sunday{color: red;}
     .weekday{color: black;}
+    .workday{color: yellow;}
     </style>
 </head>
 
@@ -58,67 +59,79 @@
     <%elsif @d.month == 12 then%>
         <h2>December <%=@d.year%></h2>
     <%end%>
-    <button type="button" onclick="location.href='/<%= @d.year %>/<%= @d.month %>/last'">
+    <button class="button" type="button" onclick="location.href='/<%=@d.year%>/<%=@d.month%>/last'">
         &lt;
     </button>
     <%if (Date.today.year > @d.year) || (Date.today.year == @d.year && Date.today.month > @d.month) then%>
         &nbsp;
-        <button type="button" onclick="location.href='/<%= @d.year %>/<%= @d.month %>/next'">
+        <button class="button" type="button" onclick="location.href='/<%=@d.year%>/<%=@d.month%>/next'">
             &gt;
         </button>
     <%end%>
 
     <tr>
-    <% if @p.wday != 6 then %>
-        <% for i in 0..(@p.wday) do %>
+    <%if @p.wday != 6 then%>
+        <%for i in 0..(@p.wday) do%>
             <td>&nbsp;</td>
-        <% end %>
-    <% end %>
-    <% until @d == @e do %>
-        <% if @d.wday == 0 then %>
+        <%end%>
+    <%end%>
+    <%until @d == @e do%>
+        <%if Worktime.where(id: session[:id]).where(date: @d.year.to_s+'-'+@d.month.to_s+'-'+@d.day.to_s).first.nil? == false then%>
             <td>
-                <a class="sunday" href="/<%= @d.year %>/<%= @d.month %>/<%= @d.day %>">
-                    <%= @d.day %>
+                <a class="workday" href="/<%=@d.year%>/<%=@d.month%>/<%=@d.day%>">
+                    <%=@d.day%>
                 </a>
             </td>
-        <% elsif @d.wday == 6 then %>
+        <%elsif @d.wday == 0 then%>
             <td>
-                <a class="saturday" href="/<%= @d.year %>/<%= @d.month %>/<%= @d.day %>">
-                    <%= @d.day %>
+                <a class="sunday" href="/<%=@d.year%>/<%=@d.month%>/<%=@d.day%>">
+                    <%=@d.day%>
                 </a>
             </td>
-        <% else %>
+        <%elsif @d.wday == 6 then%>
             <td>
-                <a class="weekday" href="/<%= @d.year %>/<%= @d.month %>/<%= @d.day %>">
-                    <%= @d.day %>
+                <a class="saturday" href="/<%=@d.year%>/<%=@d.month%>/<%=@d.day%>">
+                    <%=@d.day%>
                 </a>
             </td>
-        <% end %>
-        <% @d += 1 %>
-        <% if @d.wday == 0 then %>
+        <%else%>
+            <td>
+                <a class="weekday" href="/<%=@d.year%>/<%=@d.month%>/<%=@d.day%>">
+                    <%=@d.day%>
+                </a>
+            </td>
+        <%end%>
+        <%@d += 1%>
+        <%if @d.wday == 0 then%>
             </tr>
             <tr>
-        <% end %>
-    <% end %>
-    <% if @d.wday == 0 then %>
+        <%end%>
+    <%end%>
+    <%if Worktime.where(id: session[:id]).where(date: @d.year.to_s+'-'+@d.month.to_s+'-'+@d.day.to_s).first.nil? == false then%>
         <td>
-            <a class="sunday" href="/<%= @d.year %>/<%= @d.month %>/<%= @d.day %>">
-                <%= @d.day %>
+            <a class="workday" href="/<%=@d.year%>/<%=@d.month%>/<%=@d.day%>">
+                <%=@d.day%>
             </a>
         </td>
-    <% elsif @d.wday == 6 then %>
+    <%elsif @d.wday == 0 then%>
         <td>
-            <a class="saturday" href="/<%= @d.year %>/<%= @d.month %>/<%= @d.day %>">
-                <%= @d.day %>
+            <a class="sunday" href="/<%=@d.year%>/<%=@d.month%>/<%=@d.day%>">
+                <%=@d.day%>
             </a>
         </td>
-    <% else %>
+    <%elsif @d.wday == 6 then%>
         <td>
-            <a class="weekday" href="/<%= @d.year %>/<%= @d.month %>/<%= @d.day %>">
-                <%= @d.day %>
+            <a class="saturday" href="/<%=@d.year%>/<%=@d.month%>/<%=@d.day%>">
+                <%=@d.day%>
             </a>
         </td>
-    <% end %>
+    <%else%>
+        <td>
+            <a class="weekday" href="/<%=@d.year%>/<%=@d.month%>/<%=@d.day%>">
+                <%=@d.day%>
+            </a>
+        </td>
+    <%end%>
     </tr>
     </center>
     </table>
