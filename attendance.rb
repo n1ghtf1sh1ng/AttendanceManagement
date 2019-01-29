@@ -127,13 +127,18 @@ end
 get '/:year/:month/:day' do
     if (session[:login_flag] == true)
         session[:date] = params['year'] + '-' + params['month'] + '-' + params['day']
-        @wt = Worktime.where(id: session[:id]).where(date: session[:date]).first
+        wt_hashed = Digest::MD5.hexdigest(session[:id] + session[:date])
+        begin
+            @wt = Worktime.find(wt_hashed)
+        rescue => e
+            @wt = nil
+        end
         if @wt
             @actual_time = @wt.end_time[0,2].to_i*60 + @wt.end_time[3,2].to_i - @wt.start_time[0,2].to_i*60 - @wt.start_time[3,2].to_i
         else
             @actual_time = 0
         end
-        @w = Work.where(id: session[:id]).where(date: session[:date])
+        @w = Work.where(member_id: session[:id]).where(date: session[:date])
         session[:w_id] = @w.count + 1
         erb :contents
     else
@@ -146,8 +151,10 @@ post '/:year/:month/:day/worktime' do
     if (session[:login_flag] == true)
         begin
             worktime = Worktime.new
-            worktime.id = session[:id]
+            worktime.member_id = session[:id]
             worktime.date = params['year'] + '-' + params['month'] + '-' + params['day']
+            wt_hashed = Digest::MD5.hexdigest(session[:id] + session[:date])
+            worktime.id = wt_hashed
             if (params[:absence] == "1")
                 worktime.start_time = "00:00"
                 worktime.end_time = "00:00"
@@ -172,12 +179,14 @@ post '/:year/:month/:day/work' do
     if (session[:login_flag] == true)
         begin
             work = Work.new
-            work.w_id = session[:w_id]
-            work.id = session[:id]
+            work.work_id = session[:w_id]
+            work.member_id = session[:id]
             work.date = params['year'] + '-' + params['month'] + '-' + params['day']
             work.project = params[:project]
             work.category = params[:category]
             work.time = params[:time]
+            w_hashed = Digest::MD5.hexdigest(session[:id] + session[:date] + session[:w_id].to_s)
+            work.id = w_hashed
             work.save
             redirect '/' + params['year'] + '/' + params['month'] + '/' + params['day']
         rescue => e
@@ -191,7 +200,8 @@ end
 # 作業削除
 delete '/:year/:month/:day/w_del' do
     if (session[:login_flag] == true)
-        w = Work.where(id: session[:id]).where(date: session[:date]).where(w_id: params[:w_id]).first
+        w_hashed = Digest::MD5.hexdigest(session[:id] + session[:date] + params[:w_id].to_s)
+        w = Work.find(w_hashed)
         w.destroy
         redirect '/' + params['year'] + '/' + params['month'] + '/' + params['day']
     else

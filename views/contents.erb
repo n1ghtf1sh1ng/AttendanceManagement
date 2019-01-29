@@ -40,7 +40,7 @@
                     <option value="1">欠勤</option>
                     </select></td>
                 <td><%=@actual_time%></td>
-                <td><input type="submit" value="登録"></td>
+                <td><input class="button" type="submit" value="登録"></td>
             <%elsif @wt.nil?%>
                 <td><input type="time" name="start" value="00:00"></td>
                 <td><input type="time" name="end" value="00:00"></td>
@@ -72,13 +72,13 @@
         </tr>
         <%@w.each do |a|%>
             <tr>
-            <td><%=a.w_id%></td>
+            <td><%=a.work_id%></td>
             <td><%=a.project%></td>
             <td><%=a.category%></td>
             <td><%=a.time%></td>
             <form method="post" action="/<%=params['year']%>/<%=params['month']%>/<%=params['day']%>/w_del">
-            <td><input type="submit" value="削除"></td>
-            <input type="hidden" name="w_id" value="<%=a.w_id%>">
+            <td><input class="button" type="submit" value="削除"></td>
+            <input type="hidden" name="w_id" value="<%=a.work_id%>">
             <input type="hidden" name="_method" value="delete">
             </form>
             </tr>

@@ -1,8 +1,10 @@
+<h2>ログイン</h2>
+
 ユーザーIDとパスワードを入力してください<br>
 
 <form action="/auth" method="post">
-    ユーザーID: <input type="text" name="id" size="40" maxlength="20"><br>
-    パスワード: <input type="password" name="pass" size="40" maxlength="20"><br>
+    ユーザーID: <input required type="text" name="id" size="40" maxlength="20"><br>
+    パスワード: <input required type="password" name="pass" size="40" maxlength="20"><br>
     <br>
     <input class="button" type="submit" value="ログイン">
 </form>

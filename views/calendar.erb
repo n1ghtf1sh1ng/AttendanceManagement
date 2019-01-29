@@ -77,7 +77,7 @@
         <%end%>
     <%end%>
     <%until @d == @e do%>
-        <%if (Worktime.where(id: session[:id]).where(date: @d.year.to_s+'-'+@d.month.to_s+'-'+@d.day.to_s).first) && (Work.where(id: session[:id]).where(date: @d.year.to_s+'-'+@d.month.to_s+'-'+@d.day.to_s).first)%>
+        <%if (Worktime.where(member_id: session[:id]).where(date: @d.year.to_s+'-'+@d.month.to_s+'-'+@d.day.to_s).first) && (Work.where(member_id: session[:id]).where(date: @d.year.to_s+'-'+@d.month.to_s+'-'+@d.day.to_s).first)%>
             <td>
                 <a class="workday" href="/<%=@d.year%>/<%=@d.month%>/<%=@d.day%>">
                     <%=@d.day%>
