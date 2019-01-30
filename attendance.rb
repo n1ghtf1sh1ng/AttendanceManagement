@@ -134,12 +134,15 @@ get '/:year/:month/:day' do
             @wt = nil
         end
         if @wt
-            @actual_time = @wt.end_time[0,2].to_i*60 + @wt.end_time[3,2].to_i - @wt.start_time[0,2].to_i*60 - @wt.start_time[3,2].to_i
+            @actual_time = @wt.end_time[0,2].to_i*60 + @wt.end_time[3,2].to_i - @wt.start_time[0,2].to_i*60 - @wt.start_time[3,2].to_i - @wt.break_time
         else
             @actual_time = 0
         end
         @w = Work.where(member_id: session[:id]).where(date: session[:date])
-        session[:w_id] = @w.count + 1
+        if @w.empty?
+            session[:w_id] = 0
+        end
+        # session[:w_id] = @w.count + 1
         erb :contents
     else
         erb :badrequest
@@ -150,7 +153,11 @@ end
 post '/:year/:month/:day/worktime' do
     if (session[:login_flag] == true)
         begin
-            worktime = Worktime.new
+            if params[:update] == "0"
+                worktime = Worktime.new
+            else params[:update] == "1"
+                worktime = Worktime.find(Digest::MD5.hexdigest(session[:id] + session[:date]))
+            end
             worktime.member_id = session[:id]
             worktime.date = params['year'] + '-' + params['month'] + '-' + params['day']
             wt_hashed = Digest::MD5.hexdigest(session[:id] + session[:date])
@@ -179,6 +186,7 @@ post '/:year/:month/:day/work' do
     if (session[:login_flag] == true)
         begin
             work = Work.new
+            session[:w_id] += 1
             work.work_id = session[:w_id]
             work.member_id = session[:id]
             work.date = params['year'] + '-' + params['month'] + '-' + params['day']

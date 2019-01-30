@@ -12,6 +12,7 @@
         input{font-size:100%;}
         select{font-size:100%;}
         .button{
+            position:relative;
             font-size:100%;
             background-color: #333;
             color: #fff;
@@ -27,7 +28,9 @@
 <body>
     <h1>Attendance Management</h1>
     <%if session[:name]%>
-        <p>[<%=session[:name]%>]でログイン中</p>
+        <p>[<%=session[:name]%>]でログイン中
+        &nbsp;<button class="button" style="float:right;top:-5px;" type="button" onclick="location.href='/logout'">ログアウト</button>
+        </p>
     <%end%>
     <%=yield%>
 </body>

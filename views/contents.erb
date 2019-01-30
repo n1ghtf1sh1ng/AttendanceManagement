@@ -35,16 +35,18 @@
                 <td><input type="time" name="start" value=<%=@wt.start_time%>></td>
                 <td><input type="time" name="end" value=<%=@wt.end_time%>></td>
                 <td><input type="number" name="break" value=<%=@wt.break_time%>></td>
+                <input type="hidden" name="update" value="1">
                 <td><select id="absence" name="absence">
                     <option value="0">--</option>
                     <option value="1">欠勤</option>
                     </select></td>
                 <td><%=@actual_time%></td>
-                <td><input class="button" type="submit" value="登録"></td>
+                <td><input class="button" type="submit" value="更新"></td>
             <%elsif @wt.nil?%>
                 <td><input type="time" name="start" value="00:00"></td>
                 <td><input type="time" name="end" value="00:00"></td>
                 <td><input type="number" name="break" value="60"></td>
+                <input type="hidden" name="update" value="0">
                 <td><select id="absence" name="absence">
                     <option value="0">--</option>
                     <option value="1">欠勤</option>
@@ -86,7 +88,7 @@
 
         <form method="post" action="/<%=params['year']%>/<%=params['month']%>/<%=params['day']%>/work">
             <tr>
-            <td><%=session[:w_id]%></td>
+            <td> </td>
             <td><input type="text" name="project"></td>
             <td><select id="category" name="category">
                 <option value="開発">開発</option>
@@ -103,4 +105,3 @@
 </section>
 
 <button class="button" type="button" onclick="location.href='/<%=params['year']%>/<%=params['month']%>'">カレンダーに戻る</button>
-<button class="button" type="button" onclick="location.href='/logout'">ログアウト</button>
