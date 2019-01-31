@@ -50,10 +50,13 @@ post '/auth' do
         session[:login_flag] = true
         session[:id] = params[:id]
         session[:name] = a.name
-        a.save
         year = Date.today.year
         month = Date.today.month
-        redirect '/' + year.to_s + '/' + month.to_s
+        if a.auth == 1
+            redirect 'register_form'
+        else
+            redirect '/' + year.to_s + '/' + month.to_s
+        end
     else
         redirect '/failure'
     end
@@ -62,6 +65,36 @@ end
 # ログイン失敗
 get '/failure' do
     erb :failure
+end
+
+# 新規アカウント登録フォーム
+get '/register_form' do
+    erb :register
+end
+
+# 新規アカウント登録
+post '/register_form/register' do
+    begin
+        # if params[:pass] != params[:repass]
+        #     redirect '/'
+        # end
+        r = Random.new
+        salt = Digest::MD5.hexdigest(r.bytes(20))
+        hashed = Digest::MD5.hexdigest(salt + params[:pass])
+        for i in 0..100
+            hashed = Digest::MD5.hexdigest(salt + hashed)
+        end
+        @s = Pass.new
+        @s.id = params[:id]
+        @s.salt = salt
+        @s.hashed = hashed
+        @s.name = params[:name]
+        @s.auth = 0
+        @s.save
+        redirect '/register_form'
+    rescue => e
+        redirect '/failure'
+    end
 end
 
 # カレンダー表示
