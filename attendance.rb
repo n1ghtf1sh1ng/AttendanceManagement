@@ -37,7 +37,9 @@ post '/auth' do
         a = Pass.find(trial_id)
     rescue => e
         session[:login_flag] = false
-        redirect '/failure'
+        # ログイン失敗
+        session[:error_flag] = -1
+        redirect '/error'
     end
     db_hashed = a.hashed
     db_salt = a.salt
@@ -58,48 +60,70 @@ post '/auth' do
             redirect '/' + year.to_s + '/' + month.to_s
         end
     else
-        redirect '/failure'
+        # ログイン失敗
+        session[:error_flag] = -1
+        redirect '/error'
     end
 end
 
-# ログイン失敗
-get '/failure' do
-    erb :failure
+# 各種エラーページ
+get '/error' do
+    erb :error
+end
+
+# アカウント作成成功ページ
+get '/success' do
+    erb :success
 end
 
 # 新規アカウント登録フォーム
 get '/register_form' do
-    erb :register
+    if session[:login_flag] == true
+        @pass = Pass.all
+        erb :register
+    else
+        # 未ログインエラー
+        session[:error_flag] = -3
+        redirect '/error'
+    end
 end
 
 # 新規アカウント登録
 post '/register_form/register' do
-    begin
-        # if params[:pass] != params[:repass]
-        #     redirect '/'
-        # end
-        r = Random.new
-        salt = Digest::MD5.hexdigest(r.bytes(20))
-        hashed = Digest::MD5.hexdigest(salt + params[:pass])
-        for i in 0..100
-            hashed = Digest::MD5.hexdigest(salt + hashed)
+    if session[:login_flag] == true
+        begin
+            if params[:pass] != params[:repass]
+                session[:error_flag] = -2
+                redirect '/error'
+            end
+            r = Random.new
+            salt = Digest::MD5.hexdigest(r.bytes(20))
+            hashed = Digest::MD5.hexdigest(salt + params[:pass])
+            for i in 0..100
+                hashed = Digest::MD5.hexdigest(salt + hashed)
+            end
+            s = Pass.new
+            s.id = params[:id]
+            s.salt = salt
+            s.hashed = hashed
+            s.name = params[:name]
+            s.auth = 0
+            s.save
+            redirect '/success'
+        rescue => e
+            session[:error_flag] = -4
+            redirect '/error'
         end
-        @s = Pass.new
-        @s.id = params[:id]
-        @s.salt = salt
-        @s.hashed = hashed
-        @s.name = params[:name]
-        @s.auth = 0
-        @s.save
-        redirect '/register_form'
-    rescue => e
-        redirect '/failure'
+    else
+        # 未ログインエラー
+        session[:error_flag] = -3
+        redirect '/error'
     end
 end
 
 # カレンダー表示
 get '/:year/:month' do
-    if (session[:login_flag] == true)
+    if session[:login_flag] == true
         y = params['year']
         m = params['month']
         year = y.to_i
@@ -116,13 +140,15 @@ get '/:year/:month' do
             erb :calendar
         end
     else
-        erb :badrequest
+        # 未ログインエラー
+        session[:error_flag] = -3
+        redirect '/error'
     end
 end
 
 # 来月のカレンダーに移動
 get '/:year/:month/next' do
-    if (session[:login_flag] == true)
+    if session[:login_flag] == true
         y = params['year']
         m = params['month']
         year = y.to_i
@@ -134,13 +160,15 @@ get '/:year/:month/next' do
         end
         redirect '/' + year.to_s + '/' + month.to_s
     else
-        erb :badrequest
+        # 未ログインエラー
+        session[:error_flag] = -3
+        redirect '/error'
     end
 end
 
 # 先月のカレンダーに移動
 get '/:year/:month/last' do
-    if (session[:login_flag] == true)
+    if session[:login_flag] == true
         y = params['year']
         m = params['month']
         year = y.to_i
@@ -152,13 +180,15 @@ get '/:year/:month/last' do
         end
         redirect '/' + year.to_s + '/' + month.to_s
     else
-        erb :badrequest
+        # 未ログインエラー
+        session[:error_flag] = -3
+        redirect '/error'
     end
 end
 
 # 勤務情報登録フォーム
 get '/:year/:month/:day' do
-    if (session[:login_flag] == true)
+    if session[:login_flag] == true
         session[:date] = params['year'] + '-' + params['month'] + '-' + params['day']
         wt_hashed = Digest::MD5.hexdigest(session[:id] + session[:date])
         begin
@@ -175,78 +205,77 @@ get '/:year/:month/:day' do
         if @w.empty?
             session[:w_id] = 0
         end
-        # session[:w_id] = @w.count + 1
         erb :contents
     else
-        erb :badrequest
+        # 未ログインエラー
+        session[:error_flag] = -3
+        redirect '/error'
     end
 end
 
 # 勤務時間登録
 post '/:year/:month/:day/worktime' do
-    if (session[:login_flag] == true)
-        begin
-            if params[:update] == "0"
-                worktime = Worktime.new
-            else params[:update] == "1"
-                worktime = Worktime.find(Digest::MD5.hexdigest(session[:id] + session[:date]))
-            end
-            worktime.member_id = session[:id]
-            worktime.date = params['year'] + '-' + params['month'] + '-' + params['day']
-            wt_hashed = Digest::MD5.hexdigest(session[:id] + session[:date])
-            worktime.id = wt_hashed
-            if (params[:absence] == "1")
-                worktime.start_time = "00:00"
-                worktime.end_time = "00:00"
-                worktime.break_time = 0
-            elsif (params[:absence] == "0")
-                worktime.start_time = params[:start]
-                worktime.end_time = params[:end]
-                worktime.break_time = params[:break]
-            end
-            worktime.save
-            redirect '/' + params['year'] + '/' + params['month'] + '/' + params['day']
-        rescue => e
-            redirect '/' + params['year'] + '/' + params['month'] + '/' + params['day'] + '/error'
+    if session[:login_flag] == true
+        if params[:update] == "0"
+            worktime = Worktime.new
+        else params[:update] == "1"
+            worktime = Worktime.find(Digest::MD5.hexdigest(session[:id] + session[:date]))
         end
+        worktime.member_id = session[:id]
+        worktime.date = params['year'] + '-' + params['month'] + '-' + params['day']
+        wt_hashed = Digest::MD5.hexdigest(session[:id] + session[:date])
+        worktime.id = wt_hashed
+        if params[:absence] == "1"
+            worktime.start_time = "00:00"
+            worktime.end_time = "00:00"
+            worktime.break_time = 0
+        elsif params[:absence] == "0"
+            worktime.start_time = params[:start]
+            worktime.end_time = params[:end]
+            worktime.break_time = params[:break]
+        end
+        worktime.save
+        redirect '/' + params['year'] + '/' + params['month'] + '/' + params['day']
     else
-        erb :badrequest
+        # 未ログインエラー
+        session[:error_flag] = -3
+        redirect '/error'
     end
 end
 
 # 作業入力
 post '/:year/:month/:day/work' do
-    if (session[:login_flag] == true)
-        begin
-            work = Work.new
-            session[:w_id] += 1
-            work.work_id = session[:w_id]
-            work.member_id = session[:id]
-            work.date = params['year'] + '-' + params['month'] + '-' + params['day']
-            work.project = params[:project]
-            work.category = params[:category]
-            work.time = params[:time]
-            w_hashed = Digest::MD5.hexdigest(session[:id] + session[:date] + session[:w_id].to_s)
-            work.id = w_hashed
-            work.save
-            redirect '/' + params['year'] + '/' + params['month'] + '/' + params['day']
-        rescue => e
-            redirect '/' + params['year'] + '/' + params['month'] + '/' + params['day'] + '/error'
-        end
+    if session[:login_flag] == true
+        work = Work.new
+        session[:w_id] += 1
+        work.work_id = session[:w_id]
+        work.member_id = session[:id]
+        work.date = params['year'] + '-' + params['month'] + '-' + params['day']
+        work.project = params[:project]
+        work.category = params[:category]
+        work.time = params[:time]
+        w_hashed = Digest::MD5.hexdigest(session[:id] + session[:date] + session[:w_id].to_s)
+        work.id = w_hashed
+        work.save
+        redirect '/' + params['year'] + '/' + params['month'] + '/' + params['day']
     else
-        erb :badrequest
+        # 未ログインエラー
+        session[:error_flag] = -3
+        redirect '/error'
     end
 end
 
 # 作業削除
 delete '/:year/:month/:day/w_del' do
-    if (session[:login_flag] == true)
+    if session[:login_flag] == true
         w_hashed = Digest::MD5.hexdigest(session[:id] + session[:date] + params[:w_id].to_s)
         w = Work.find(w_hashed)
         w.destroy
         redirect '/' + params['year'] + '/' + params['month'] + '/' + params['day']
     else
-        erb :badrequest
+        # 未ログインエラー
+        session[:error_flag] = -3
+        redirect '/error'
     end
 end
 
@@ -254,9 +283,4 @@ end
 get '/logout' do
     session.clear
     erb :logout
-end
-
-# データベースエラー
-get '/:year/:month/:day/error' do
-    erb :regerror
 end
